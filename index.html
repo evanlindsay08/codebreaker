@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeBreaker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #16213e;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lock-container {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .padlock {
+            width: 180px;
+            height: 220px;
+            background: #0f3460;
+            margin: 0 auto;
+            border-radius: 20px;
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .padlock::before {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            border: 25px solid #0f3460;
+            border-radius: 100px 100px 0 0;
+            left: 50%;
+            transform: translateX(-50%);
+            top: -60px;
+            transition: all 0.5s ease;
+        }
+
+        .padlock.unlocked::before {
+            transform: translateX(-50%) rotate(-10deg);
+            left: 30%;
+        }
+
+        .lock-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 10px;
+            background: #16213e;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .digit-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 35px;
+        }
+
+        .digit {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 32px;
+            height: 40px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px 0;
+            background: #16213e;
+            border-radius: 5px;
+        }
+
+        .arrow {
+            background-color: #0f3460;
+            border: none;
+            color: #e0e0e0;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 25px;
+            height: 25px;
+        }
+
+        .arrow:hover {
+            background-color: #1a1a2e;
+        }
+
+        .social-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0f3460;
+            cursor: pointer;
+        }
+
+        .social-button img {
+            width: 25px;
+            height: 25px;
+        }
+
+        .buy-button {
+            background-color: #0f3460;
+            color: #e0e0e0;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .timer-container {
+            position: relative;
+            margin: 20px;
+            background: #16213e;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            width: fit-content;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+        }
+
+        .timer {
+            color: #e0e0e0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #16213e;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #e0e0e0;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .lock-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 28px;
+            font-weight: 500;
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .custom-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #16213e;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            text-align: center;
+            min-width: 300px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+        }
+
+        .popup-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+
+        .popup-message {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        .popup-button {
+            background: #0f3460;
+            color: #e0e0e0;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .popup-button:hover {
+            background: #1a4980;
+        }
+
+        .success-popup {
+            border: 2px solid #4CAF50;
+        }
+
+        .cooldown-popup {
+            border: 2px solid #ff6b6b;
+        }
+
+        .enter-button-container {
+            margin-top: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>CodeBreaker</h1>
+        <div class="header-buttons">
+            <a href="https://x.com/CodeBreaker_SOL" class="social-button">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/twitter.svg" alt="Twitter">
+            </a>
+            <a href="https://t.me/Codebreakersol" class="social-button">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/telegram.svg" alt="Telegram">
+            </a>
+            <button class="buy-button" onclick="window.location.href='https://pump.fun/board'">
+                Buy Now
+            </button>
+        </div>
+    </div>
+
+    <div class="timer-container">
+        <div class="timer" id="timer">Ready to attempt!</div>
+    </div>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="lock-title">Guess the code!</div>
+            
+            <div class="lock-container">
+                <div class="padlock" id="padlock">
+                    <div class="lock-display">
+                        <div class="digit-container">
+                            <button class="arrow" onclick="moveDigit(0, 'up')">↑</button>
+                            <div class="digit">0</div>
+                            <button class="arrow" onclick="moveDigit(0, 'down')">↓</button>
+                        </div>
+                        <div class="digit-container">
+                            <button class="arrow" onclick="moveDigit(1, 'up')">↑</button>
+                            <div class="digit">0</div>
+                            <button class="arrow" onclick="moveDigit(1, 'down')">↓</button>
+                        </div>
+                        <div class="digit-container">
+                            <button class="arrow" onclick="moveDigit(2, 'up')">↑</button>
+                            <div class="digit">0</div>
+                            <button class="arrow" onclick="moveDigit(2, 'down')">↓</button>
+                        </div>
+                        <div class="digit-container">
+                            <button class="arrow" onclick="moveDigit(3, 'up')">↑</button>
+                            <div class="digit">0</div>
+                            <button class="arrow" onclick="moveDigit(3, 'down')">↓</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="enter-button-container">
+                <button onclick="submitCode()" class="buy-button">Enter</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>How to Play:</h2>
+            <ol>
+                <li>Use the up/down arrows to select your 4-digit combination</li>
+                <li>Press Enter when ready to submit</li>
+                <li>If correct, you'll receive access to the developer wallet private key</li>
+                <li>You can only attempt once every 30 minutes</li>
+                <li>Good luck!</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="popup-overlay" id="popupOverlay"></div>
+
+    <div class="custom-popup success-popup" id="successPopup">
+        <div class="popup-title">Congratulations! 🎉</div>
+        <div class="popup-message">
+            You've cracked the code! Here's the developer private key:<br>
+            <span style="color: #4CAF50; word-break: break-all; font-family: monospace;">2zHqF8SdvrohadbbLf52Lpm3S9vsB2UK4fFz2udW9F4R95eqoWzcj8APwcmh2YGVmwri97NQ114BPZAaps9VgKRD</span>
+        </div>
+        <button class="popup-button" onclick="closePopup('successPopup')">Close</button>
+    </div>
+
+    <div class="custom-popup cooldown-popup" id="cooldownPopup">
+        <div class="popup-title">Cooldown Active ⏳</div>
+        <div class="popup-message" id="cooldownMessage">
+            Please wait for the cooldown to finish.
+        </div>
+        <button class="popup-button" onclick="closePopup('cooldownPopup')">Got it</button>
+    </div>
+
+    <script>
+        let code = [0, 0, 0, 0];
+        const correctCode = [3, 7, 5, 1]; // Change this to your desired combination
+        let timerInterval;
+
+        function updateTimer() {
+            const lastAttempt = localStorage.getItem('lastAttempt');
+            const timerElement = document.getElementById('timer');
+            
+            if (!lastAttempt) {
+                timerElement.textContent = 'Ready to attempt!';
+                timerElement.style.color = '#4CAF50';  // Green color for ready state
+                return true;
+            }
+
+            const timeDiff = Date.now() - parseInt(lastAttempt);
+            const timeLeft = Math.max(30 * 60 * 1000 - timeDiff, 0);
+            
+            if (timeLeft === 0) {
+                timerElement.textContent = 'Ready to attempt!';
+                timerElement.style.color = '#4CAF50';  // Green color for ready state
+                return true;
+            }
+
+            const minutes = Math.floor(timeLeft / (60 * 1000));
+            const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            timerElement.textContent = `Cooldown: ${timeString}`;
+            timerElement.style.color = '#e0e0e0';
+            
+            // Update cooldown popup message if it's visible
+            const cooldownMessage = document.getElementById('cooldownMessage');
+            cooldownMessage.textContent = `Please wait ${timeString} before your next attempt.`;
+            
+            return false;
+        }
+
+        function canAttempt() {
+            const lastAttempt = localStorage.getItem('lastAttempt');
+            if (!lastAttempt) return true;
+            
+            const timeDiff = Date.now() - parseInt(lastAttempt);
+            return timeDiff >= 30 * 60 * 1000;
+        }
+
+        function updateDisplay() {
+            const digits = document.querySelectorAll('.digit');
+            code.forEach((num, index) => {
+                digits[index].textContent = num;
+            });
+        }
+
+        function moveDigit(position, direction) {
+            if (direction === 'up') {
+                code[position] = (code[position] + 1) % 10;
+            } else {
+                code[position] = (code[position] - 1 + 10) % 10;
+            }
+            updateDisplay();
+        }
+
+        function submitCode() {
+            if (!canAttempt()) {
+                showPopup('cooldownPopup');
+                return;
+            }
+
+            if (JSON.stringify(code) === JSON.stringify(correctCode)) {
+                document.getElementById('padlock').classList.add('unlocked');
+                setTimeout(() => {
+                    showPopup('successPopup');
+                }, 1000);
+            } else {
+                localStorage.setItem('lastAttempt', Date.now().toString());
+                updateTimer();
+                showPopup('cooldownPopup');
+            }
+        }
+
+        function showModal() {
+            document.getElementById('instructionsModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('instructionsModal').style.display = 'none';
+        }
+
+        function showPopup(popupId) {
+            document.getElementById('popupOverlay').style.display = 'block';
+            document.getElementById(popupId).style.display = 'block';
+        }
+
+        function closePopup(popupId) {
+            document.getElementById('popupOverlay').style.display = 'none';
+            document.getElementById(popupId).style.display = 'none';
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            const activeElement = document.activeElement;
+            if (activeElement.tagName === 'BUTTON') return;
+
+            const position = code.length - 1;
+            switch(e.key) {
+                case 'ArrowUp':
+                    moveDigit(position, 'up');
+                    break;
+                case 'ArrowDown':
+                    moveDigit(position, 'down');
+                    break;
+                case 'Enter':
+                    submitCode();
+                    break;
+            }
+        });
+
+        // Initialize timer and set interval
+        updateTimer();
+        setInterval(updateTimer, 1000);
+
+        // Show modal on load
+        window.onload = showModal;
+    </script>
+</body>
+</html>
